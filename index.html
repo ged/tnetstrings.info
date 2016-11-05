@@ -5,94 +5,113 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="Spec for typed netstrings.">
 
-	<title>TNetstrings</title>
+	<title>TNetstrings Specification</title>
 	
-	<link rel="stylesheet" type="text/css" href="/css/base.css">
-	<script defer src="/js/jquery.js" type="text/javascript" charset="utf-8"></script>
+	<link rel="stylesheet" type="text/css" href="css/base.css">
 	<script defer src="/js/prism.js" type="text/javascript" charset="utf-8" data-manual></script>
-	<script defer src="/js/main.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
 
-<h1>About Tagged Netstrings</h1>
+	<main class="container">
+		<h1>About Tagged Netstrings</h1>
 
-<p>TNetStrings stand for a "tagged netstrings" and are a modification of Dan
-Bernstein's <a href="http://cr.yp.to/proto/netstrings.txt">netstrings</a>
-specification to allow for the same data structures as <a
-    href="http://www.json.org/">JSON</a> but in a format that meets these
-requirements:</p>
+		<p>TNetStrings stand for a "tagged netstrings" and are a modification of Dan
+			Bernstein's <a href="http://cr.yp.to/proto/netstrings.txt">netstrings</a>
+			specification to allow for the same data structures as <a
+			href="http://www.json.org/">JSON</a> but in a format that meets these
+			requirements:</p>
 
-<ol>
-    <li>Trivial to parse in every language without making errors.</li>
-    <li>Resistant to buffer overflows and other problems.</li>
-    <li>Fast and low resource intensive.</li>
-    <li>Makes no assumptions about string contents and can store binary data without <b>escaping</b> or <b>encoding</b> them.</li>
-    <li>Backward compatible with original netstrings.</li>
-    <li>Transport agnostic, so it works with streams, messages, files, anything that's 8-bit clean.</li>
-</ol>
+		<ol>
+			<li>Trivial to parse in every language without making errors.</li>
+			<li>Resistant to buffer overflows and other problems.</li>
+			<li>Fast and low resource intensive.</li>
+			<li>Makes no assumptions about string contents and can store binary 
+				data without <b>escaping</b> or <b>encoding</b> them.</li>
+			<li>Backward compatible with original netstrings.</li>
+			<li>Transport agnostic, so it works with streams, messages, files, 
+				anything that's 8-bit clean.</li>
+		</ol>
 
-<h1>Grammar</h1>
+		<h2>Grammar</h2>
 
-<p>The grammar for the protocol is simply:</p>
+		<p>The grammar for the protocol is simply:</p>
 
-<pre>
-SIZE = [0-9]{1,9}
+		<pre><code>SIZE = [0-9]{1,9}
 COLON = ':'
 DATA = (.*)
 TYPE = ('#' | '}' | ']' | ',' | '!' | '~' | '^')
-payload = (SIZE COLON DATA TYPE)+
-</pre>
+payload = (SIZE COLON DATA TYPE)+</code></pre>
 
-<p>Each of these elements is defined as:</p>
+		<p>Each of these elements is defined as:</p>
 
-<dl>
-    <dt>SIZE</dt><dd>A ascii encoded integer that is no longer than 9 digits long, and anyone receiving a message can abort at any length lower than that limit.</dd>
-    <dt>COLON</dt><dd>A colon character.</dd>
-    <dt>DATA</dt><dd>A sequence of bytes that is SIZE in length and <b>can</b> include all of the TYPE chars since the SIZE is used, not the terminal TYPE char.</dd>
-    <dt>TYPE</dt><dd>A character indicating what type the DATA is.</dd>
-</dl>
+		<dl class="compact">
+			<dt><code>SIZE</code></dt>
+			<dd>A ascii encoded integer that is no longer than 9 digits long, 
+				and anyone receiving a message can abort at any length lower than that limit.</dd>
+			<dt><code>COLON</code></dt>
+			<dd>A colon character.</dd>
+			<dt><code>DATA</code></dt>
+			<dd>A sequence of bytes that is SIZE in length and <b>can</b> include 
+				all of the TYPE chars since the SIZE is used, not the terminal TYPE char.</dd>
+			<dt><code>TYPE</code></dt>
+			<dd>A character indicating what type the DATA is.</dd>
+		</dl>
 
-<p>Each TYPE is used to determine the contents and maps to:</p>
+		<p>Each TYPE is used to determine the contents and maps to:</p>
 
-<dl>
-    <dt>,</dt><dd>string (byte array)</dd>
-    <dt>#</dt><dd>integer</dd>
-    <dt>^</dt><dd>float</dd>
-    <dt>!</dt><dd>boolean of 'true' or 'false'</dd>
-    <dt>~</dt><dd>null always encoded as 0:~</dd>
-    <dt>}</dt><dd>Dictionary which you recurse into to fill with key=value pairs inside the payload contents.</dd>
-    <dt>]</dt><dd>List which you recurse into to fill with values of any type.</dd>
-</dl>
+		<dl class="compact">
+			<dt><code>,</code></dt>
+			<dd>string (byte array)</dd>
+			<dt><code>#</code></dt>
+			<dd>integer</dd>
+			<dt><code>^</code></dt>
+			<dd>float</dd>
+			<dt><code>!</code></dt>
+			<dd>boolean of 'true' or 'false'</dd>
+			<dt><code>~</code></dt>
+			<dd>null always encoded as 0:~</dd>
+			<dt><code>}</code></dt>
+			<dd>Dictionary which you recurse into to fill with key=value
+				pairs inside the payload contents.</dd>
+			<dt><code>]</code></dt>
+			<dd>List which you recurse into to fill with values of any type.</dd>
+		</dl>
 
-<h1>Failure Mode</h1>
+		<h2>Failure Mode</h2>
 
-<p>TNetstrings are all or nothing.  Either they parse cleanly and a value is
-returned, or it aborts and cleans up any in-process data returning nothing.  As
-in the reference implementation below, it's normal to return the remainder of a
-given buffer for further processing, meaning all of a given buffer does not
-need to be parsed for a single parsing call to be successful.  </p>
+		<p>TNetstrings are all or nothing.  Either they parse cleanly and a value is
+			returned, or it aborts and cleans up any in-process data returning nothing.  As
+			in the reference implementation below, it's normal to return the remainder of a
+			given buffer for further processing, meaning all of a given buffer does not
+			need to be parsed for a single parsing call to be successful.  </p>
 
-<h1>Implementation Restrictions</h1>
+		<h2>Implementation Restrictions</h2>
 
-<p>You are not allowed to implement any of the following features:</p>
+		<p>You are not allowed to implement any of the following features:</p>
 
-<dl>
-    <dt>UTF-8 Strings</dt><dd>String encoding is an application level, political, and display specification. Transport protocols should not have to decode random character encodings accurately to function properly.</dd>
-    <dt>Arbitrary Dict Keys</dt><dd>Keys must be <b>strings</b> only.</dd>
-    <dt>Floats Undefined</dt><dd>Floats are encoded with X.Y format, with no precision, accuracy, or other assurances.</dd>
-</dl>
+		<dl>
+			<dt>UTF-8 Strings</dt><dd>String encoding is an application level, 
+				political, and display specification. Transport protocols should 
+				not have to decode random character encodings accurately to function 
+				properly.</dd>
+			<dt>Arbitrary Dict Keys</dt><dd>Keys must be <b>strings</b> only.</dd>
+			<dt>Floats Undefined</dt><dd>Floats are encoded with X.Y format, with 
+				no precision, accuracy, or other assurances.</dd>
+		</dl>
 
-<p>These restrictions exist to make the protocol reliable for anyone
-who uses it and to act as a constraint on the design to keep it simple.
-</p>
+		<p>These restrictions exist to make the protocol reliable for anyone
+			who uses it and to act as a constraint on the design to keep it simple.
+		</p>
 
 
-<h1>Reference Implemenation</h1>
+		<h2>Reference Implemenation</h2>
 
-<p>You should be able to work with this simple reference implementation
-written in Python 2.5 or greater (but not 3.x):</p>
+		<p>You should be able to work with this simple reference implementation
+			written in Python 2.5 or greater (but not 3.x):</p>
 
-<pre>
+		<pre><code># Note this implementation is more strict than necessary to demonstrate
+# minimum restrictions on types allowed in dictionaries.
+
 def dump(data):
     if type(data) is long or type(data) is int:
         out = str(data)
@@ -138,6 +157,7 @@ def parse(data):
 
     return value, remain
 
+
 def parse_payload(data):
     assert data, "Invalid data to parse, it's empty."
     length, extra = data.split(':', 1)
@@ -149,6 +169,7 @@ def parse_payload(data):
 
     assert len(payload) == length, "Data is wrong length %d vs %d" % (length, len(payload))
     return payload, payload_type, remain
+
 
 def parse_list(data):
     if len(data) == 0: return []
@@ -163,12 +184,14 @@ def parse_list(data):
 
     return result
 
+
 def parse_pair(data):
     key, extra = parse(data)
     assert extra, "Unbalanced dictionary store."
     value, extra = parse(extra)
 
     return key, value, extra
+
 
 def parse_dict(data):
     if len(data) == 0: return {}
@@ -183,7 +206,6 @@ def parse_dict(data):
         result[key] = value
   
     return result
-    
 
 
 def dump_dict(data):
@@ -203,66 +225,72 @@ def dump_list(data):
 
     payload = ''.join(result)
     return '%d:' % len(payload) + payload + ']'
+</code></pre>
+
+		<p>You can 
+			<a href="http://tnetstrings.org/tnetstrings.py">download tnetstrings.py</a> 
+			directly to review it.</p>
+
+		<h2>Conformance</h2>
+
+		<p>If your implementation does not work with the above Python implementation
+			then it is wrong and is not tnetstrings.  It's that simple.</p>
+
+		<h2>Streaming</h2>
+
+		<p>Tnetstrings put the length at the beginning and the type at the end so that
+			you have to read all of the data element and cannot "stream" it.  This makes it
+			much easier to handle, since nested data structures need to be loaded into RAM
+			anyway to handle them.  It's also unnecessary to allow for streaming, since
+			sockets/files/etc are already streamable.  If you need to send 1000 DVDs, don't
+			try to encode them in 1 tnetstring payload, instead send them as a sequence of
+			tnetstrings as payload chunks with checks and headers like most other
+			protocols.  In other words: If you think you need to dive into a tnetstring
+			data type to "stream", then you need to remove one layer and flatten it
+			instead.</p>
+
+		<p>Here's an example to make this concrete. Many protocols have a simple
+			<code>HEADER+BODY</code> design where the <code>HEADER</code> is usually some kind 
+			of dict, and the body is a raw binary blob of data. Your first idea might be to 
+			create one tnetstring of <code>[{HEADER}, "BODY"]</code>, but that'd only work if 
+			you expect to limit the request sizes. If the requests can be any size then you
+			<b>actually</b> should do one of two things:</p>
+
+		<ol>
+			<li>Design the protocol so that it's <b>always</b> <code>HEADER</code> followed by 
+				<code>BODY</code>, with no tnetstring wrapping them.  Tnetstrings APIs are designed 
+				so that you can read, parse, then take the remainder and keep reading, so this is 
+				easy.  It does limit asynchronous operations.
+			</li>
+			<li>Design the protocol so that messages are a limited size <code>[{HEADER}, "BODY"]</code> 
+				design, of say 64k, and then let senders use the header to indicate a UUID and a 
+				<code>"SENDMORE"</code> flag. Usually the first header would indicate the full 
+				message size, a checksum, and a first body chunk.  Then it sends each new piece 
+				with a small header and the original UUID. Finally when it's done it closes it off
+				with a final message. This has the disadvantage of taking up a few more bytes on 
+				each message, but has the advantage that you can send multiple streams at once over 
+				the same pipe.
+			</li>
+		</ol>
+
+		<p>
+			Finally, the general rule is senders should have to completely specify the size of
+			what they send and receivers should be ready to reject it.  If you allow arbitrary streaming
+			then your servers will suffer attacks that eat your resources.
+		</p>
+	</main>
 
 
-</pre>
+	<footer>
+		<h3>History</h3>
 
-<p>You can <a href="http://tnetstrings.org/tnetstrings.py">download tnetstrings.py</a> directly to review it.</p>
-
-<h1>Conformance</h1>
-
-<p>If your implementation does not work with the above Python implementation
-then it is wrong and is not tnetstrings.  It's that simple.</p>
-
-<h1>Streaming</h1>
-
-<p>Tnetstrings put the length at the beginning and the type at the end so that
-you have to read all of the data element and cannot "stream" it.  This makes it
-much easier to handle, since nested data structures need to be loaded into RAM
-anyway to handle them.  It's also unnecessary to allow for streaming, since
-sockets/files/etc are already streamable.  If you need to send 1000 DVDs, don't
-try to encode them in 1 tnetstring payload, instead send them as a sequence of
-tnetstrings as payload chunks with checks and headers like most other
-protocols.  In other words: If you think you need to dive into a tnetstring
-data type to "stream", then you need to remove one layer and flatten it
-instead.</p>
-
-<p>Here's an example to make this concrete.  Many protocols have a simple HEADER+BODY
-design where the HEADER is usually some kind of dict, and the body is a raw binary blob
-of data.  Your first idea might be to create one tnetstring of [{HEADER}, "BODY"], but
-that'd only work if you expect to limit the request sizes.  If the requests can be any
-size then you <b>actually</b> should do one of two things:</p>
-
-<ol>
-    <li>Design the protocol so that it's <b>always</b> HEADER followed by BODY, with no
-    tnetstring wrapping them.  Tnetstrings APIs are designed so that you can read, parse, 
-    then take the remainder and keep reading, so this is easy.  It does limit asynchronous
-    operations.
-    </li>
-    <li>Design the protocol so that messages are a limited size [{HEADER}, "BODY"] design, of
-    say 64k, and then let senders use the header to indicate a UUID and a "SENDMORE" flag.
-    Usually the first header would indicate the full message size, a checksum, and a first
-    body chunk.  Then it sends each new piece with a small header and the original UUID.
-    Finally when it's done it closes it off with a final message.  This has the disadvantage
-    of taking up a few more bytes on each message, but has the advantage that you can send
-    multiple streams at once over the same pipe.
-    </li>
-</ol>
-
-<p>
-Finally, the general rule is senders should have to completely specify the size of
-what they send and receivers should be ready to reject it.  If you allow arbitrary streaming
-then your servers will suffer attacks that eat your resources.
-</p>
-
-<h1>History</h1>
-
-<pre>
+		<pre>
 Sat Nov 05 11:32:12 PDT 2016 -- Fix a few unbalanced tags.
 Sat Nov 05 11:10:11 PDT 2016 -- Recovered from archive.org.
 Mon Aug 22 09:25:06 PDT 2011 -- Fixed a bug in the dump if-statement.
 Sun Aug 21 00:09:19 PDT 2011 -- Added support for floats and how to do "streaming".
-</pre>
+		</pre>
+	</footer>
 
 </body>
 </html>
