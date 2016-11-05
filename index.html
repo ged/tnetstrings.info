@@ -33,7 +33,7 @@ requirements:</p>
 
 <h1>Grammar</h1>
 
-<p>The grammar for the protocol is simply:<p>
+<p>The grammar for the protocol is simply:</p>
 
 <pre>
 SIZE = [0-9]{1,9}
@@ -79,7 +79,7 @@ need to be parsed for a single parsing call to be successful.  </p>
 <dl>
     <dt>UTF-8 Strings</dt><dd>String encoding is an application level, political, and display specification. Transport protocols should not have to decode random character encodings accurately to function properly.</dd>
     <dt>Arbitrary Dict Keys</dt><dd>Keys must be <b>strings</b> only.</dd>
-    <dt>Floats Undefined</dt><dd>Floats are encoded with X.Y format, with no precision, accuracy, or other assurances.</dt>
+    <dt>Floats Undefined</dt><dd>Floats are encoded with X.Y format, with no precision, accuracy, or other assurances.</dd>
 </dl>
 
 <p>These restrictions exist to make the protocol reliable for anyone
@@ -258,6 +258,7 @@ then your servers will suffer attacks that eat your resources.
 <h1>History</h1>
 
 <pre>
+Sat Nov 05 11:32:12 PDT 2016 -- Fix a few unbalanced tags.
 Sat Nov 05 11:10:11 PDT 2016 -- Recovered from archive.org.
 Mon Aug 22 09:25:06 PDT 2011 -- Fixed a bug in the dump if-statement.
 Sun Aug 21 00:09:19 PDT 2011 -- Added support for floats and how to do "streaming".
