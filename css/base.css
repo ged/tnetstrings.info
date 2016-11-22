@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css?family=Raleway');
 @import url(normalize.css);
 @import url(skeleton.css);
+@import url(prism.css);
 
 main > h1 {
 	margin-top: 4rem;
