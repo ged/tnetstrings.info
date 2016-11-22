@@ -7,6 +7,7 @@
 
 	<title>TNetstrings Specification</title>
 	
+	<script src="js/prism.js" type="text/javascript" async></script>
 	<link rel="stylesheet" type="text/css" href="css/base.css">
 </head>
 <body>
@@ -35,28 +36,28 @@
 
 		<p>The grammar for the protocol is simply:</p>
 
-		<pre><code>SIZE = [0-9]{1,9}
-COLON = ':'
-DATA = (.*)
-TYPE = ('#' | '}' | ']' | ',' | '!' | '~' | '^')
+		<pre><code>SIZE    = [0-9]{1,9}
+COLON   = ':'
+DATA    = (.*)
+TYPE    = ('#' | '}' | ']' | ',' | '!' | '~' | '^')
 payload = (SIZE COLON DATA TYPE)+</code></pre>
 
 		<p>Each of these elements is defined as:</p>
 
 		<dl class="compact">
 			<dt><code>SIZE</code></dt>
-			<dd>A ascii encoded integer that is no longer than 9 digits long, 
-				and anyone receiving a message can abort at any length lower than that limit.</dd>
+			<dd>A ascii encoded integer that is no longer than 9 digits long.</dd>
 			<dt><code>COLON</code></dt>
 			<dd>A colon character.</dd>
 			<dt><code>DATA</code></dt>
-			<dd>A sequence of bytes that is SIZE in length and <b>can</b> include 
-				all of the TYPE chars since the SIZE is used, not the terminal TYPE char.</dd>
+			<dd>A sequence of bytes that is <code>SIZE</code> in length. The bytes <b>can</b> 
+				include any of the <code>TYPE</code> characters since the <code>SIZE</code>
+				is used to determine the end, not a terminal <code>TYPE</code> char.</dd>
 			<dt><code>TYPE</code></dt>
-			<dd>A character indicating what type the DATA is.</dd>
+			<dd>A character indicating what type the <code>DATA</code> is.</dd>
 		</dl>
 
-		<p>Each TYPE is used to determine the contents and maps to:</p>
+		<p>Each <code>TYPE</code> is used to determine the contents and maps to:</p>
 
 		<dl class="compact">
 			<dt><code>,</code></dt>
@@ -84,6 +85,10 @@ payload = (SIZE COLON DATA TYPE)+</code></pre>
 			given buffer for further processing, meaning all of a given buffer does not
 			need to be parsed for a single parsing call to be successful.  </p>
 
+		<p>Since the <code>SIZE</code> can be read before consuming any other data, 
+			anyone receiving a message can abort immediately if the data exceeds
+			a limit on the number of bytes.</p>
+
 		<h2>Implementation Restrictions</h2>
 
 		<p>You are not allowed to implement any of the following features:</p>
@@ -108,7 +113,7 @@ payload = (SIZE COLON DATA TYPE)+</code></pre>
 		<p>You should be able to work with this simple reference implementation
 			written in Python 2.5 or greater (but not 3.x):</p>
 
-		<pre><code># Note this implementation is more strict than necessary to demonstrate
+		<pre><code class="language-python"># Note this implementation is more strict than necessary to demonstrate
 # minimum restrictions on types allowed in dictionaries.
 
 def dump(data):
@@ -370,12 +375,12 @@ def dump_list(data):
 
 		<p>The contents of this page were copied from an old archived copy of Zed A. Shaw's
 			<tt>tnetstrings.org</tt> site, which has since disappeared. Most of the content contained
-			herein was written by him; I just fixed a few missing closing tags, added links
-			to implementations, and did the CSS. Any mistakes in this copy are likely mine.</p>
+			herein was written by him; any mistakes in this copy are likely mine.</p>
 
 		<h3>History</h3>
 
 		<pre>
+Mon Nov 21 23:57:02 PDT 2016 -- Rephrased some things for clarity.
 Sat Nov 05 11:10:11 PDT 2016 -- Recovered from archive.org.
 Mon Aug 22 09:25:06 PDT 2011 -- Fixed a bug in the dump if-statement.
 Sun Aug 21 00:09:19 PDT 2011 -- Added support for floats and how to do "streaming".
